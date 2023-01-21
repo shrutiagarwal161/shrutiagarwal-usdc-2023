@@ -18,13 +18,49 @@
  * @param {JSON} scannedTextObj - A JSON object representing the scanned text.
  * @returns {JSON} - Search results.
  * */ 
+
+// check inputs
+// iterate through books if there are more than 0 books
+// check if there is content for each book
+// for each book that has content, look for the word
+// if the word is found add it to the results list
+// return the results list after all books have been iterated through
+
  function findSearchTermInBooks(searchTerm, scannedTextObj) {
     /** You will need to implement your search and 
      * return the appropriate object here. */
 
+    var resultList = []
+
+    if(searchTerm != "" && scannedTextObj.length>0){ // checking inputs to see if there are books
+        for(iBook=0; iBook<scannedTextObj.length; iBook++){
+            book = scannedTextObj[iBook];
+            if(book.Content.length >0){ // checking to see if the book has scanned content, go to next book if not
+                isbn = book.ISBN
+                for(iContent=0; iContent<book.Content.length; iContent++){
+                    line = book.Content[iContent].Line
+                    page = book.Content[iContent].Page
+                    text = book.Content[iContent].Text
+
+                    if(line.search(searchTerm) > -1){
+                        resultList.add(
+                            {
+                                "ISBN": isbn,
+                                "Page": page,
+                                "Line": line
+                            }
+                        )
+                    }
+                }
+            }
+
+        }
+
+    }
+
     var result = {
-        "SearchTerm": "",
-        "Results": []
+        "SearchTerm": searchTerm,
+        "Results": resultList
     };
     
     return result; 
