@@ -33,16 +33,20 @@
     var resultList = []
 
     if(searchTerm != "" && scannedTextObj.length>0){ // checking inputs to see if there are books
-        for(iBook=0; iBook<scannedTextObj.length; iBook++){
+        for(var iBook=0; iBook<scannedTextObj.length; iBook++){
+            // console.log(resultList.length)
             var book = scannedTextObj[iBook];
+            // console.log(book.Title)
             if(book.Content.length >0){ // checking to see if the book has scanned content, go to next book if not
                 var isbn = book.ISBN
-                for(iContent=0; iContent<book.Content.length; iContent++){
+                for(var iContent=0; iContent<book.Content.length; iContent++){
                     var line = book.Content[iContent].Line;
                     var page = book.Content[iContent].Page;
                     var text = book.Content[iContent].Text;
 
                     if(text.search(searchTerm) > -1){
+                        // MAKE SURE CHARS BEFORE AND AFTER SEARCH TERM ARE NOT OTHER LETTERS (ONLY PUNCTUATION)
+                        // console.log(searchTerm+" FOUND in "+text)
                         resultList.push(
                             {
                                 "ISBN": isbn,
@@ -52,14 +56,13 @@
                         )
                     }
                     else{
+                        // console.log(searchTerm+" not found in "+text)
                     }
                 }
             }
-
         }
-
     }
-
+    // console.log(resultList)
     var result = {
         "SearchTerm": searchTerm,
         "Results": resultList
@@ -172,13 +175,12 @@ if (JSON.stringify(testcase2out) === JSON.stringify(testcase2result)) {
 }
 
 /** We could choose to check that we get the right number of results. */
-const testcase2lengthresult = findSearchTermInBooks("the", testcase2in); 
-if (testcase2lengthresult.Results.length == 0) {
+if (testcase2result.Results.length == 0) {
     console.log("PASS: Test 4");
 } else {
     console.log("FAIL: Test 4");
     console.log("Expected:", testcase2out.Results.length);
-    console.log("Received:", testcase2lengthresult.Results.length);
+    console.log("Received:", testcase2result.Results.length);
 }
 
 
@@ -197,11 +199,7 @@ const testcase3in = [
     
 const testcase3out = {
     "SearchTerm": "the",
-    "Results": [
-        {
-            
-        }
-    ]
+    "Results": []
 }
 
 const testcase3result = findSearchTermInBooks("the", testcase3in);
@@ -214,13 +212,12 @@ if (JSON.stringify(testcase3out) === JSON.stringify(testcase3result)) {
 }
 
 /** We could choose to check that we get the right number of results. */
-const testcase3lengthresult = findSearchTermInBooks("the", testcase3in); 
-if (testcase3lengthresult.Results.length == 0) {
+if (testcase3result.Results.length == 0) {
     console.log("PASS: Test 6");
 } else {
     console.log("FAIL: Test 6");
     console.log("Expected:", testcase3out.Results.length);
-    console.log("Received:", testcase3lengthresult.Results.length);
+    console.log("Received:", testcase3result.Results.length);
 }
 
 /*
@@ -267,17 +264,16 @@ if (JSON.stringify(testcase4out) === JSON.stringify(testcase4result)) {
 }
 
 /** We could choose to check that we get the right number of results. */
-const testcase4lengthresult = findSearchTermInBooks("the", testcase4in); 
-if (testcase4lengthresult.Results.length == 0) {
+if (testcase4result.Results.length == 0) {
     console.log("PASS: Test 8");
 } else {
     console.log("FAIL: Test 8");
     console.log("Expected:", testcase4out.Results.length);
-    console.log("Received:", testcase4lengthresult.Results.length);
+    console.log("Received:", testcase4result.Results.length);
 }
 
 /*
-Test Case 5: Testing term with multiple books and multiple lines should return lines with term present
+Test Case 5: Search term with multiple books and multiple lines inputted should return lines with term present
 Input: search term "the" with 2 book and 3 lines scanned each
 Expected Output: Book 1 line 1, Book 2 line 1,2 outputted
 */
@@ -347,7 +343,7 @@ const testcase5out = {
     ]
 }
 
-const testcase5result = findSearchTermInBooks("", testcase5in);
+const testcase5result = findSearchTermInBooks("the dog", testcase5in);
 if (JSON.stringify(testcase5out) === JSON.stringify(testcase5result)) {
     console.log("PASS: Test 9");
 } else {
@@ -356,19 +352,17 @@ if (JSON.stringify(testcase5out) === JSON.stringify(testcase5result)) {
     console.log("Received:", testcase5result);
 }
 
-
 /** We could choose to check that we get the right number of results. */
-const testcase5lengthresult = findSearchTermInBooks("the", testcase5in); 
-if (testcase5lengthresult.Results.length == 3) {
+if (testcase5result.Results.length == 3) {
     console.log("PASS: Test 10");
 } else {
     console.log("FAIL: Test 10");
     console.log("Expected:", testcase5out.Results.length);
-    console.log("Received:", testcase5lengthresult.Results.length);
+    console.log("Received:", testcase5result.Results.length);
 }
 
 /*
-Test Case 6: Testing search term with upper case letter 
+Test Case 6: Search term and lines including term in different cases should only return lines with the term in the correct case
 Input: search term "The dog" with 1 book and 4 lines scanned
 Expected Output: Book 1 line 2 outputted
 */
@@ -409,38 +403,102 @@ const testcase6out = {
         {
             "ISBN": "1234",
             "Page": 100,
-            "Line": 2
+            "Line": 1
         },
     ]
 }
 
-const testcase6result = findSearchTermInBooks("", testcase6in);
+const testcase6result = findSearchTermInBooks("the dog", testcase6in);
 if (JSON.stringify(testcase6out) === JSON.stringify(testcase6result)) {
-    console.log("PASS: Test 9");
+    console.log("PASS: Test 11");
 } else {
-    console.log("FAIL: Test 9");
+    console.log("FAIL: Test 11");
     console.log("Expected:", testcase6out);
     console.log("Received:", testcase6result);
 }
 
 /** We could choose to check that we get the right number of results. */
-const testcase6lengthresult = findSearchTermInBooks("the", testcase6in); 
-if (testcase6lengthresult.Results.length == 3) {
-    console.log("PASS: Test 10");
+if (testcase6result.Results.length == 3) {
+    console.log("PASS: Test 12");
 } else {
-    console.log("FAIL: Test 10");
+    console.log("FAIL: Test 12");
     console.log("Expected:", testcase6out.Results.length);
-    console.log("Received:", testcase6lengthresult.Results.length);
+    console.log("Received:", testcase6result.Results.length);
+}
+
+/*
+Test Case 7: Search term with upper case letter should return lines with only uppercase letter term present
+Input: search term "The dog" with 1 book and 4 lines scanned
+Expected Output: Book 1 line 2 outputted
+*/
+/** Example input object. */
+const testcase7in = [
+    {
+        "Title": "Book 1",
+        "ISBN": "1234",
+        "Content": [
+            {
+                "Page": 100,
+                "Line": 1,
+                "Text": "the dog eats food"
+            },
+            {
+                "Page": 100,
+                "Line": 2,
+                "Text": "The dog eats food"
+            },
+            {
+                "Page": 100,
+                "Line": 3,
+                "Text": "THE DOG"
+            },
+            {
+                "Page": 100,
+                "Line": 4,
+                "Text": "this is the Dog"
+            } 
+        ] 
+    },
+]
+    
+/** Example output object */
+const testcase7out = {
+    "SearchTerm": "The dog",
+    "Results": [
+        {
+            "ISBN": "1234",
+            "Page": 100,
+            "Line": 2
+        },
+    ]
+}
+
+const testcase7result = findSearchTermInBooks("The dog", testcase7in);
+if (JSON.stringify(testcase7out) === JSON.stringify(testcase7result)) {
+    console.log("PASS: Test 13");
+} else {
+    console.log("FAIL: Test 13");
+    console.log("Expected:", testcase7out);
+    console.log("Received:", testcase7result);
+}
+
+/** We could choose to check that we get the right number of results. */
+if (testcase7result.Results.length == 3) {
+    console.log("PASS: Test 14");
+} else {
+    console.log("FAIL: Test 14");
+    console.log("Expected:", testcase7out.Results.length);
+    console.log("Received:", testcase7result.Results.length);
 }
 
 
 /*
-Test Case 7: Testing search term with different punctuation and term placements
+Test Case 8: Search term with lines including different punctuation and term placements should return correct lines with term present
 Input: search term "the dog" with 1 book and 4 lines scanned
 Expected Output: Book 1 lines
 */
 /** Example input object. */
-const testcase7in = [
+const testcase8in = [
     {
         "Title": "Book 1",
         "ISBN": "1234",
@@ -490,7 +548,7 @@ const testcase7in = [
 ]
     
 /** Example output object */
-const testcase7out = {
+const testcase8out = {
     "SearchTerm": "the dog",
     "Results": [
         {
@@ -521,23 +579,22 @@ const testcase7out = {
     ]
 }
 
-const testcase7result = findSearchTermInBooks("", testcase7in);
-if (JSON.stringify(testcase7out) === JSON.stringify(testcase7result)) {
-    console.log("PASS: Test 11");
+const testcase8result = findSearchTermInBooks("the dog", testcase8in);
+if (JSON.stringify(testcase8out) === JSON.stringify(testcase8result)) {
+    console.log("PASS: Test 15");
 } else {
-    console.log("FAIL: Test 11");
-    console.log("Expected:", testcase7out);
-    console.log("Received:", testcase7result);
+    console.log("FAIL: Test 15");
+    console.log("Expected:", testcase8out);
+    console.log("Received:", testcase8result);
 }
 
 /** We could choose to check that we get the right number of results. */
-const testcase7lengthresult = findSearchTermInBooks("the", testcase7in); 
-if (testcase7lengthresult.Results.length == 3) {
-    console.log("PASS: Test 12");
+if (testcase8result.Results.length == 3) {
+    console.log("PASS: Test 16");
 } else {
-    console.log("FAIL: Test 12");
-    console.log("Expected:", testcase7out.Results.length);
-    console.log("Received:", testcase7lengthresult.Results.length);
+    console.log("FAIL: Test 16");
+    console.log("Expected:", testcase8out.Results.length);
+    console.log("Received:", testcase8result.Results.length);
 }
 
 
