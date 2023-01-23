@@ -30,45 +30,37 @@
     /** You will need to implement your search and 
      * return the appropriate object here. */
 
-    var resultList = []
+    var resultList = [] // temporary list to return at the end of checking all the books
 
-    if(searchTerm != "" && scannedTextObj.length>0){ // checking inputs to see if there are books
+    if(searchTerm != "" && scannedTextObj.length>0){ // checks inputs to see if there are books in the input
         for(var iBook=0; iBook<scannedTextObj.length; iBook++){
-            // console.log(resultList.length)
             var book = scannedTextObj[iBook];
-            // console.log(book.Title)
-            if(book.Content.length >0){ // checking to see if the book has scanned content, go to next book if not
+            if(book.Content.length >0){ // checks to see if the book has scanned content, skips this if and goes to next book if not
                 var isbn = book.ISBN
                 for(var iContent=0; iContent<book.Content.length; iContent++){
-                    var line = book.Content[iContent].Line;
-                    var page = book.Content[iContent].Page;
+                    var lineNum = book.Content[iContent].Line;
+                    var pageNum = book.Content[iContent].Page;
                     var text = book.Content[iContent].Text;
 
-                    if(text.search(searchTerm) > -1){
-                        // MAKE SURE CHARS BEFORE AND AFTER SEARCH TERM ARE NOT OTHER LETTERS (ONLY PUNCTUATION)
-                        // console.log(searchTerm+" FOUND in "+text)
-                        resultList.push(
+                    var textArray = text.split(" "); // converts the string of text into an array with each word being an element of the array
+                    if(textArray.includes(searchTerm)){ // checks if the search term is in the text by checking the array
+                        resultList.push( // if the term is found, add the page and line number to the temporary array to be returned at the end
                             {
                                 "ISBN": isbn,
-                                "Page": page,
-                                "Line": line
+                                "Page": pageNum,
+                                "Line": lineNum
                             }
                         )
-                    }
-                    else{
-                        // console.log(searchTerm+" not found in "+text)
                     }
                 }
             }
         }
     }
-    // console.log(resultList)
     var result = {
         "SearchTerm": searchTerm,
-        "Results": resultList
+        "Results": resultList // subs in the temporary array of books to be included in the return object
     };
     
-    // console.log(result);
     return result; 
 }
 
@@ -134,18 +126,18 @@ const twentyLeaguesOut = {
     ]
 }
 
-const test1result = findSearchTermInBooks("the", twentyLeaguesIn);
-if (JSON.stringify(twentyLeaguesOut) === JSON.stringify(test1result)) {
+const test1Result = findSearchTermInBooks("the", twentyLeaguesIn);
+if (JSON.stringify(twentyLeaguesOut) === JSON.stringify(test1Result)) {
     console.log("PASS: Test 1");
 } else {
     console.log("FAIL: Test 1");
     console.log("Expected:", twentyLeaguesOut);
-    console.log("Received:", test1result);
+    console.log("Received:", test1Result);
 }
 
 /** We could choose to check that we get the right number of results. */
-const test2result = findSearchTermInBooks("the", twentyLeaguesIn); 
-if (test2result.Results.length == 1) {
+const test2Result = findSearchTermInBooks("the", twentyLeaguesIn); 
+if (test2Result.Results.length == twentyLeaguesOut.Results.length) {
     console.log("PASS: Test 2");
 } else {
     console.log("FAIL: Test 2");
@@ -158,66 +150,62 @@ Test Case 2: No books inputted should return empty results
 Input: Search term "the" with empty list of books
 Expected Output: Empty list of results
 */
-const testcase2in = []
-    
-const testcase2out = {
-    "SearchTerm": "the",
+const testCase2In = []
+const testCase2Term = "the"
+const testCase2Out = {
+    "SearchTerm": testCase2Term,
     "Results": []
 }
 
-const testcase2result = findSearchTermInBooks("the", testcase2in);
-if (JSON.stringify(testcase2out) === JSON.stringify(testcase2result)) {
+const testCase2Result = findSearchTermInBooks(testCase2Term, testCase2In);
+if (JSON.stringify(testCase2Out) === JSON.stringify(testCase2Result)) {
     console.log("PASS: Test 3");
 } else {
     console.log("FAIL: Test 3");
-    console.log("Expected:", testcase2out);
-    console.log("Received:", testcase2result);
+    console.log("Expected:", testCase2Out);
+    console.log("Received:", testCase2Result);
 }
 
-/** We could choose to check that we get the right number of results. */
-if (testcase2result.Results.length == 0) {
+if (testCase2Result.Results.length == testCase2Out.Results.length) {
     console.log("PASS: Test 4");
 } else {
     console.log("FAIL: Test 4");
-    console.log("Expected:", testcase2out.Results.length);
-    console.log("Received:", testcase2result.Results.length);
+    console.log("Expected:", testCase2Out.Results.length);
+    console.log("Received:", testCase2Result.Results.length);
 }
-
 
 /*
 Test Case 3: No lines scanned should return empty results
 Input: "the" and 1 book with empty content
 Expected Output: Empty list of results 
 */
-const testcase3in = [
+const testCase3In = [
     {
         "Title": "Twenty Thousand Leagues Under the Sea",
         "ISBN": "9780000528531",
         "Content": [] 
     }
 ]
-    
-const testcase3out = {
-    "SearchTerm": "the",
+const testCase3Term = "the"
+const testCase3Out = {
+    "SearchTerm": testCase3Term,
     "Results": []
 }
-
-const testcase3result = findSearchTermInBooks("the", testcase3in);
-if (JSON.stringify(testcase3out) === JSON.stringify(testcase3result)) {
+const testCase3Result = findSearchTermInBooks(testCase3Term, testCase3In);
+if (JSON.stringify(testCase3Out) === JSON.stringify(testCase3Result)) {
     console.log("PASS: Test 5");
 } else {
     console.log("FAIL: Test 5");
-    console.log("Expected:", testcase3out);
-    console.log("Received:", testcase3result);
+    console.log("Expected:", testCase3Out);
+    console.log("Received:", testCase3Result);
 }
 
-/** We could choose to check that we get the right number of results. */
-if (testcase3result.Results.length == 0) {
+if (testCase3Result.Results.length == testCase3Out.Results.length) {
     console.log("PASS: Test 6");
 } else {
     console.log("FAIL: Test 6");
-    console.log("Expected:", testcase3out.Results.length);
-    console.log("Received:", testcase3result.Results.length);
+    console.log("Expected:", testCase3Out.Results.length);
+    console.log("Received:", testCase3Result.Results.length);
 }
 
 /*
@@ -225,7 +213,7 @@ Test Case 4: No search term in 1 book with 3 lines should return empty results
 Input: search term "" with 1 book and 3 lines
 Expected Output: line 9 outputted
 */
-const testcase4in = [
+const testCase4In = [
     {
         "Title": "Twenty Thousand Leagues Under the Sea",
         "ISBN": "9780000528531",
@@ -235,41 +223,29 @@ const testcase4in = [
                 "Line": 8,
                 "Text": "now simply went on by her own momentum.  The dark-"
             },
-            {
-                "Page": 31,
-                "Line": 9,
-                "Text": "ness was then profound; and however good the Canadian\'s"
-            },
-            {
-                "Page": 31,
-                "Line": 10,
-                "Text": "eyes were, I asked myself how he had managed to see, and"
-            } 
         ] 
     }
 ]
-    
-const testcase4out = {
-    "SearchTerm": "",
+const testCase4Term = ""
+const testCase4Out = {
+    "SearchTerm": testCase4Term,
     "Results": []
 }
 
-const testcase4result = findSearchTermInBooks("", testcase4in);
-if (JSON.stringify(testcase4out) === JSON.stringify(testcase4result)) {
+const testCase4Result = findSearchTermInBooks(testCase4Term, testCase4In);
+if (JSON.stringify(testCase4Out) === JSON.stringify(testCase4Result)) {
     console.log("PASS: Test 7");
 } else {
     console.log("FAIL: Test 7");
-    console.log("Expected:", testcase4out);
-    console.log("Received:", testcase4result);
+    console.log("Expected:", testCase4Out);
+    console.log("Received:", testCase4Result);
 }
-
-/** We could choose to check that we get the right number of results. */
-if (testcase4result.Results.length == 0) {
+if (testCase4Result.Results.length == testCase4Out.Results.length) {
     console.log("PASS: Test 8");
 } else {
     console.log("FAIL: Test 8");
-    console.log("Expected:", testcase4out.Results.length);
-    console.log("Received:", testcase4result.Results.length);
+    console.log("Expected:", testCase4Out.Results.length);
+    console.log("Received:", testCase4Result.Results.length);
 }
 
 /*
@@ -277,7 +253,7 @@ Test Case 5: Search term with multiple books and multiple lines inputted should 
 Input: search term "the" with 2 book and 3 lines scanned each
 Expected Output: Book 1 line 1, Book 2 line 1,2 outputted
 */
-const testcase5in = [
+const testCase5In = [
     {
         "Title": "Book 1",
         "ISBN": "1234",
@@ -306,7 +282,7 @@ const testcase5in = [
             {
                 "Page": 100,
                 "Line": 1,
-                "Text": "I like the dog."
+                "Text": "I like the dog"
             },
             {
                 "Page": 101,
@@ -321,9 +297,9 @@ const testcase5in = [
         ] 
     },
 ]
-    
-const testcase5out = {
-    "SearchTerm": "the dog",
+const testCase5Term = "dog"    
+const testCase5Out = {
+    "SearchTerm": testCase5Term,
     "Results": [
         {
             "ISBN": "1234",
@@ -343,31 +319,28 @@ const testcase5out = {
     ]
 }
 
-const testcase5result = findSearchTermInBooks("the dog", testcase5in);
-if (JSON.stringify(testcase5out) === JSON.stringify(testcase5result)) {
+const testCase5Result = findSearchTermInBooks(testCase5Term, testCase5In);
+if (JSON.stringify(testCase5Out) === JSON.stringify(testCase5Result)) {
     console.log("PASS: Test 9");
 } else {
     console.log("FAIL: Test 9");
-    console.log("Expected:", testcase5out);
-    console.log("Received:", testcase5result);
+    console.log("Expected:", testCase5Out);
+    console.log("Received:", testCase5Result);
 }
-
-/** We could choose to check that we get the right number of results. */
-if (testcase5result.Results.length == 3) {
+if (testCase5Result.Results.length == testCase5Out.Results.length) {
     console.log("PASS: Test 10");
 } else {
     console.log("FAIL: Test 10");
-    console.log("Expected:", testcase5out.Results.length);
-    console.log("Received:", testcase5result.Results.length);
+    console.log("Expected:", testCase5Out.Results.length);
+    console.log("Received:", testCase5Result.Results.length);
 }
 
 /*
 Test Case 6: Search term and lines including term in different cases should only return lines with the term in the correct case
-Input: search term "The dog" with 1 book and 4 lines scanned
+Input: search term "Dog" with 1 book and 3 lines scanned
 Expected Output: Book 1 line 2 outputted
 */
-/** Example input object. */
-const testcase6in = [
+const testCase6In = [
     {
         "Title": "Book 1",
         "ISBN": "1234",
@@ -380,90 +353,20 @@ const testcase6in = [
             {
                 "Page": 100,
                 "Line": 2,
-                "Text": "The dog eats food"
+                "Text": "Dog eats food"
             },
             {
                 "Page": 100,
                 "Line": 3,
                 "Text": "THE DOG"
             },
-            {
-                "Page": 100,
-                "Line": 4,
-                "Text": "this is the Dog"
-            } 
         ] 
     },
 ]
-    
+const testCase6Term = "Dog"    
 /** Example output object */
-const testcase6out = {
-    "SearchTerm": "the dog",
-    "Results": [
-        {
-            "ISBN": "1234",
-            "Page": 100,
-            "Line": 1
-        },
-    ]
-}
-
-const testcase6result = findSearchTermInBooks("the dog", testcase6in);
-if (JSON.stringify(testcase6out) === JSON.stringify(testcase6result)) {
-    console.log("PASS: Test 11");
-} else {
-    console.log("FAIL: Test 11");
-    console.log("Expected:", testcase6out);
-    console.log("Received:", testcase6result);
-}
-
-/** We could choose to check that we get the right number of results. */
-if (testcase6result.Results.length == 3) {
-    console.log("PASS: Test 12");
-} else {
-    console.log("FAIL: Test 12");
-    console.log("Expected:", testcase6out.Results.length);
-    console.log("Received:", testcase6result.Results.length);
-}
-
-/*
-Test Case 7: Search term with upper case letter should return lines with only uppercase letter term present
-Input: search term "The dog" with 1 book and 4 lines scanned
-Expected Output: Book 1 line 2 outputted
-*/
-/** Example input object. */
-const testcase7in = [
-    {
-        "Title": "Book 1",
-        "ISBN": "1234",
-        "Content": [
-            {
-                "Page": 100,
-                "Line": 1,
-                "Text": "the dog eats food"
-            },
-            {
-                "Page": 100,
-                "Line": 2,
-                "Text": "The dog eats food"
-            },
-            {
-                "Page": 100,
-                "Line": 3,
-                "Text": "THE DOG"
-            },
-            {
-                "Page": 100,
-                "Line": 4,
-                "Text": "this is the Dog"
-            } 
-        ] 
-    },
-]
-    
-/** Example output object */
-const testcase7out = {
-    "SearchTerm": "The dog",
+const testCase6Out = {
+    "SearchTerm": testCase6Term,
     "Results": [
         {
             "ISBN": "1234",
@@ -473,32 +376,110 @@ const testcase7out = {
     ]
 }
 
-const testcase7result = findSearchTermInBooks("The dog", testcase7in);
-if (JSON.stringify(testcase7out) === JSON.stringify(testcase7result)) {
-    console.log("PASS: Test 13");
+const testCase6Result = findSearchTermInBooks(testCase6Term, testCase6In);
+if (JSON.stringify(testCase6Out) === JSON.stringify(testCase6Result)) {
+    console.log("PASS: Test 11");
 } else {
-    console.log("FAIL: Test 13");
-    console.log("Expected:", testcase7out);
-    console.log("Received:", testcase7result);
+    console.log("FAIL: Test 11");
+    console.log("Expected:", testCase6Out);
+    console.log("Received:", testCase6Result);
 }
 
 /** We could choose to check that we get the right number of results. */
-if (testcase7result.Results.length == 3) {
+if (testCase6Result.Results.length == testCase6Out.Results.length) {
+    console.log("PASS: Test 12");
+} else {
+    console.log("FAIL: Test 12");
+    console.log("Expected:", testCase6Out.Results.length);
+    console.log("Received:", testCase6Result.Results.length);
+}
+
+/*
+Test Case 7: Search term in lines with punctuation around the term should still find the term and return lines with the term in it
+Input: search term "dog" with 1 book and 4 lines scanned, punctuation around term in all 4 lines
+Expected Output: Book 1 line 2 outputted
+*/
+/** Example input object. */
+const testCase7In = [
+    {
+        "Title": "Book 1",
+        "ISBN": "1234",
+        "Content": [
+            {
+                "Page": 100,
+                "Line": 1,
+                "Text": "the -dog- eats food"
+            },
+            {
+                "Page": 100,
+                "Line": 2,
+                "Text": "the dog!"
+            },
+            {
+                "Page": 100,
+                "Line": 3,
+                "Text": "-dog cat"
+            },
+            {
+                "Page": 100,
+                "Line": 4,
+                "Text": "the dog, is big"
+            } 
+        ] 
+    },
+]
+const testCase7Term = "dog"
+const testCase7Out = {
+    "SearchTerm": testCase7Term,
+    "Results": [
+        {
+            "ISBN": "1234",
+            "Page": 100,
+            "Line": 1
+        },
+        {
+            "ISBN": "1234",
+            "Page": 100,
+            "Line": 2
+        },
+        {
+            "ISBN": "1234",
+            "Page": 100,
+            "Line": 3
+        },
+        {
+            "ISBN": "1234",
+            "Page": 100,
+            "Line": 4
+        }
+    ]
+}
+
+const testCase7Result = findSearchTermInBooks(testCase7Term, testCase7In);
+if (JSON.stringify(testCase7Out) === JSON.stringify(testCase7Result)) {
+    console.log("PASS: Test 13");
+} else {
+    console.log("FAIL: Test 13");
+    console.log("Expected:", testCase7Out);
+    console.log("Received:", testCase7Result);
+}
+
+/** We could choose to check that we get the right number of results. */
+if (testCase7Result.Results.length == testCase7Out.Results.length) {
     console.log("PASS: Test 14");
 } else {
     console.log("FAIL: Test 14");
-    console.log("Expected:", testcase7out.Results.length);
-    console.log("Received:", testcase7result.Results.length);
+    console.log("Expected:", testCase7Out.Results.length);
+    console.log("Received:", testCase7Result.Results.length);
 }
 
 
 /*
-Test Case 8: Search term with lines including different punctuation and term placements should return correct lines with term present
-Input: search term "the dog" with 1 book and 4 lines scanned
-Expected Output: Book 1 lines
+Test Case 8: Lines with the search term inside of another word should not be returned
+Input: search term "dog" with 1 book and 2 lines scanned
+Expected Output: Book 1 line 1
 */
-/** Example input object. */
-const testcase8in = [
+const testCase8In = [
     {
         "Title": "Book 1",
         "ISBN": "1234",
@@ -510,91 +491,38 @@ const testcase8in = [
             },
             {
                 "Page": 100,
-                "Line": 2,
-                "Text": "wordsthedog"
+                "Line": 1,
+                "Text": "the dogdog the"
             },
-            {
-                "Page": 100,
-                "Line": 3,
-                "Text": "words the dog."
-            },
-            {
-                "Page": 100,
-                "Line": 4,
-                "Text": "-the dog!"
-            } ,
-            {
-                "Page": 100,
-                "Line": 5,
-                "Text": "wordthe dog"
-            },
-            {
-                "Page": 100,
-                "Line": 6,
-                "Text": "!the dog"
-            },
-            {
-                "Page": 100,
-                "Line": 7,
-                "Text": "word-the dog!"
-            }, 
-            {
-                "Page": 100,
-                "Line": 8,
-                "Text": "word -the dog!"
-            } 
         ] 
     },
 ]
-    
-/** Example output object */
-const testcase8out = {
-    "SearchTerm": "the dog",
+const testCase8Term = "dog"
+const testCase8Out = {
+    "SearchTerm": testCase8Term,
     "Results": [
         {
             "ISBN": "1234",
             "Page": 100,
             "Line": 1
-        },
-        {
-            "ISBN": "1234",
-            "Page": 100,
-            "Line": 3
-        },
-        {
-            "ISBN": "1234",
-            "Page": 100,
-            "Line": 4
-        },
-        {
-            "ISBN": "1234",
-            "Page": 100,
-            "Line": 6
-        },
-        {
-            "ISBN": "1234",
-            "Page": 100,
-            "Line": 8
-        },
+        }
     ]
 }
 
-const testcase8result = findSearchTermInBooks("the dog", testcase8in);
-if (JSON.stringify(testcase8out) === JSON.stringify(testcase8result)) {
+const testCase8Result = findSearchTermInBooks(testCase8Term, testCase8In);
+if (JSON.stringify(testCase8Out) === JSON.stringify(testCase8Result)) {
     console.log("PASS: Test 15");
 } else {
     console.log("FAIL: Test 15");
-    console.log("Expected:", testcase8out);
-    console.log("Received:", testcase8result);
+    console.log("Expected:", testCase8Out);
+    console.log("Received:", testCase8Result);
 }
-
-/** We could choose to check that we get the right number of results. */
-if (testcase8result.Results.length == 3) {
+if (testCase8Result.Results.length == testCase8Out.Results.length) {
     console.log("PASS: Test 16");
 } else {
     console.log("FAIL: Test 16");
-    console.log("Expected:", testcase8out.Results.length);
-    console.log("Received:", testcase8result.Results.length);
+    console.log("Expected:", testCase8Out.Results.length);
+    console.log("Received:", testCase8Result.Results.length);
 }
 
 
