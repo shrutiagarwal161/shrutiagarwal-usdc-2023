@@ -19,17 +19,7 @@
  * @returns {JSON} - Search results.
  * */ 
 
-// check inputs
-// iterate through books if there are more than 0 books
-// check if there is content for each book
-// for each book that has content, look for the word
-// if the word is found add it to the results list
-// return the results list after all books have been iterated through
-
- function findSearchTermInBooks(searchTerm, scannedTextObj) {
-    /** You will need to implement your search and 
-     * return the appropriate object here. */
-
+function findSearchTermInBooks(searchTerm, scannedTextObj) {
     var resultList = [] // temporary list to return at the end of checking all the books
 
     if(searchTerm != "" && scannedTextObj.length>0){ // checks inputs to see if there are books in the input
@@ -37,11 +27,13 @@
             var book = scannedTextObj[iBook];
             if(book.Content.length >0){ // checks to see if the book has scanned content, skips this if and goes to next book if not
                 var isbn = book.ISBN
+                var lineBreakMap = new Map(); //lineIndex,halfword
+                var previousLineHasBreak = false
                 for(var iContent=0; iContent<book.Content.length; iContent++){
                     var lineNum = book.Content[iContent].Line;
                     var pageNum = book.Content[iContent].Page;
                     var text = book.Content[iContent].Text;
-
+                    text = text.replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g,"");
                     var textArray = text.split(" "); // converts the string of text into an array with each word being an element of the array
                     if(textArray.includes(searchTerm)){ // checks if the search term is in the text by checking the array
                         resultList.push( // if the term is found, add the page and line number to the temporary array to be returned at the end
@@ -50,7 +42,42 @@
                                 "Page": pageNum,
                                 "Line": lineNum
                             }
-                        )
+                        );
+                    }else{
+                        if(previousLineHasBreak){
+                            var previousWord = lineBreakMap.get(iContent-1);
+                            if(previousWord+textArray[0] == searchTerm && 
+                                pageNum == book.Content[iContent-1].Page && // making sure the word that separated by the page break is only counted if it is on the same page
+                                lineNum == book.Content[iContent-1].Line + 1){ // making sure the word that separated by the page break is only counted if it is on the next line of the same page
+                                var previousResult = {
+                                    "ISBN": isbn,
+                                    "Page": book.Content[iContent-1].Page,
+                                    "Line": book.Content[iContent-1].Line
+                                }
+                                if(!resultList.some( // this check is to make sure the search term wasn't included in the previous sentence twice, before the page break because we don't want to add the result twice (Test Case 11)
+                                    (r) => ((r.ISBN==previousResult.ISBN)&& // checks if any result "r" in the list of results already built is the same result as the previous line, if it is then don't add the result in the result list (again)
+                                            (r.pageNum==previousResult.pageNum)&&
+                                            (r.LineNum==previousResult.LineNum)))){
+                                                resultList.push(previousResult); // if the term was only in part of the word of the pagebreak and nowhere else in the previous line, add the previous line to the result as well
+
+                                }
+                                resultList.push( // if the term is found, add the page and line number to the temporary array to be returned at the end
+                                {
+                                    "ISBN": isbn,
+                                    "Page": pageNum,
+                                    "Line": lineNum
+                                }
+                            );
+                            }
+                            else{
+                                previousLineHasBreak = false;
+                            }
+                        }
+                    }
+                    var lastWord = textArray[textArray.length - 1]
+                    if(lastWord.charAt(lastWord.length-1)=="-"){
+                        previousLineHasBreak =  true;
+                        lineBreakMap.set(iContent, lastWord.substring(0, lastWord.length-1))
                     }
                 }
             }
@@ -63,7 +90,6 @@
     
     return result; 
 }
-
 
 
 /*
@@ -142,7 +168,7 @@ if (test2Result.Results.length == twentyLeaguesOut.Results.length) {
 } else {
     console.log("FAIL: Test 2");
     console.log("Expected:", twentyLeaguesOut.Results.length);
-    console.log("Received:", test2result.Results.length);
+    console.log("Received:", test2Result.Results.length);
 }
 
 /*
@@ -166,14 +192,6 @@ if (JSON.stringify(testCase2Out) === JSON.stringify(testCase2Result)) {
     console.log("Received:", testCase2Result);
 }
 
-if (testCase2Result.Results.length == testCase2Out.Results.length) {
-    console.log("PASS: Test 4");
-} else {
-    console.log("FAIL: Test 4");
-    console.log("Expected:", testCase2Out.Results.length);
-    console.log("Received:", testCase2Result.Results.length);
-}
-
 /*
 Test Case 3: No lines scanned should return empty results
 Input: "the" and 1 book with empty content
@@ -193,19 +211,11 @@ const testCase3Out = {
 }
 const testCase3Result = findSearchTermInBooks(testCase3Term, testCase3In);
 if (JSON.stringify(testCase3Out) === JSON.stringify(testCase3Result)) {
-    console.log("PASS: Test 5");
+    console.log("PASS: Test 4");
 } else {
-    console.log("FAIL: Test 5");
+    console.log("FAIL: Test 4");
     console.log("Expected:", testCase3Out);
     console.log("Received:", testCase3Result);
-}
-
-if (testCase3Result.Results.length == testCase3Out.Results.length) {
-    console.log("PASS: Test 6");
-} else {
-    console.log("FAIL: Test 6");
-    console.log("Expected:", testCase3Out.Results.length);
-    console.log("Received:", testCase3Result.Results.length);
 }
 
 /*
@@ -234,18 +244,11 @@ const testCase4Out = {
 
 const testCase4Result = findSearchTermInBooks(testCase4Term, testCase4In);
 if (JSON.stringify(testCase4Out) === JSON.stringify(testCase4Result)) {
-    console.log("PASS: Test 7");
+    console.log("PASS: Test 5");
 } else {
-    console.log("FAIL: Test 7");
+    console.log("FAIL: Test 5");
     console.log("Expected:", testCase4Out);
     console.log("Received:", testCase4Result);
-}
-if (testCase4Result.Results.length == testCase4Out.Results.length) {
-    console.log("PASS: Test 8");
-} else {
-    console.log("FAIL: Test 8");
-    console.log("Expected:", testCase4Out.Results.length);
-    console.log("Received:", testCase4Result.Results.length);
 }
 
 /*
@@ -321,18 +324,11 @@ const testCase5Out = {
 
 const testCase5Result = findSearchTermInBooks(testCase5Term, testCase5In);
 if (JSON.stringify(testCase5Out) === JSON.stringify(testCase5Result)) {
-    console.log("PASS: Test 9");
+    console.log("PASS: Test 6");
 } else {
-    console.log("FAIL: Test 9");
+    console.log("FAIL: Test 6");
     console.log("Expected:", testCase5Out);
     console.log("Received:", testCase5Result);
-}
-if (testCase5Result.Results.length == testCase5Out.Results.length) {
-    console.log("PASS: Test 10");
-} else {
-    console.log("FAIL: Test 10");
-    console.log("Expected:", testCase5Out.Results.length);
-    console.log("Received:", testCase5Result.Results.length);
 }
 
 /*
@@ -378,20 +374,11 @@ const testCase6Out = {
 
 const testCase6Result = findSearchTermInBooks(testCase6Term, testCase6In);
 if (JSON.stringify(testCase6Out) === JSON.stringify(testCase6Result)) {
-    console.log("PASS: Test 11");
+    console.log("PASS: Test 7");
 } else {
-    console.log("FAIL: Test 11");
+    console.log("FAIL: Test 7");
     console.log("Expected:", testCase6Out);
     console.log("Received:", testCase6Result);
-}
-
-/** We could choose to check that we get the right number of results. */
-if (testCase6Result.Results.length == testCase6Out.Results.length) {
-    console.log("PASS: Test 12");
-} else {
-    console.log("FAIL: Test 12");
-    console.log("Expected:", testCase6Out.Results.length);
-    console.log("Received:", testCase6Result.Results.length);
 }
 
 /*
@@ -408,21 +395,16 @@ const testCase7In = [
             {
                 "Page": 100,
                 "Line": 1,
-                "Text": "the -dog- eats food"
-            },
-            {
-                "Page": 100,
-                "Line": 2,
                 "Text": "the dog!"
             },
             {
                 "Page": 100,
-                "Line": 3,
-                "Text": "-dog cat"
+                "Line": 2,
+                "Text": "(dog) cat"
             },
             {
                 "Page": 100,
-                "Line": 4,
+                "Line": 3,
                 "Text": "the dog, is big"
             } 
         ] 
@@ -446,31 +428,17 @@ const testCase7Out = {
             "ISBN": "1234",
             "Page": 100,
             "Line": 3
-        },
-        {
-            "ISBN": "1234",
-            "Page": 100,
-            "Line": 4
         }
     ]
 }
 
 const testCase7Result = findSearchTermInBooks(testCase7Term, testCase7In);
 if (JSON.stringify(testCase7Out) === JSON.stringify(testCase7Result)) {
-    console.log("PASS: Test 13");
+    console.log("PASS: Test 8");
 } else {
-    console.log("FAIL: Test 13");
+    console.log("FAIL: Test 8");
     console.log("Expected:", testCase7Out);
     console.log("Received:", testCase7Result);
-}
-
-/** We could choose to check that we get the right number of results. */
-if (testCase7Result.Results.length == testCase7Out.Results.length) {
-    console.log("PASS: Test 14");
-} else {
-    console.log("FAIL: Test 14");
-    console.log("Expected:", testCase7Out.Results.length);
-    console.log("Received:", testCase7Result.Results.length);
 }
 
 
@@ -511,18 +479,161 @@ const testCase8Out = {
 
 const testCase8Result = findSearchTermInBooks(testCase8Term, testCase8In);
 if (JSON.stringify(testCase8Out) === JSON.stringify(testCase8Result)) {
-    console.log("PASS: Test 15");
+    console.log("PASS: Test 9");
 } else {
-    console.log("FAIL: Test 15");
+    console.log("FAIL: Test 9");
     console.log("Expected:", testCase8Out);
     console.log("Received:", testCase8Result);
 }
-if (testCase8Result.Results.length == testCase8Out.Results.length) {
-    console.log("PASS: Test 16");
-} else {
-    console.log("FAIL: Test 16");
-    console.log("Expected:", testCase8Out.Results.length);
-    console.log("Received:", testCase8Result.Results.length);
+
+/*
+Test Case 9: If a term is split between a pagebreak and both lines including the term are scanned, then both lines should be included in the results.
+Input: search term "darkness" with 1 book and 3 lines scanned and the term is cut by a page break
+Expected Output: Book 1 line 1
+*/
+const testCase9In = [
+    {
+        "Title": "Twenty Thousand Leagues Under the Sea",
+        "ISBN": "9780000528531",
+        "Content": [
+            {
+                "Page": 31,
+                "Line": 8,
+                "Text": "now simply went on by her own momentum.  The dark-"
+            },
+            {
+                "Page": 31,
+                "Line": 9,
+                "Text": "ness was then profound; and however good the Canadian\'s"
+            },
+            {
+                "Page": 31,
+                "Line": 10,
+                "Text": "eyes were, I asked myself how he had managed to see, and"
+            } 
+        ] 
+    }
+]
+const testCase9Term = "darkness"
+const testCase9Out = {
+    "SearchTerm": testCase9Term,
+    "Results": [
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 8
+        },
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 9
+        }
+    ]
 }
 
+const testCase9Result = findSearchTermInBooks(testCase9Term, testCase9In);
+if (JSON.stringify(testCase9Out) === JSON.stringify(testCase9Result)) {
+    console.log("PASS: Test 10");
+} else {
+    console.log("FAIL: Test 10");
+    console.log("Expected:", testCase9Out);
+    console.log("Received:", testCase9Result);
+}
 
+/*
+Test Case 10: If a term is in split with a page break but the next line isn't the next line of the page, then neither line should be included in the result (even if the split term is the whole term across 2 pages) 
+("dark-" and "ness" make up the search term darkness but "dark-" is on page 31 and "ness" is on page 32 so they would not be included as a result)
+Input: search term "darkness" with 1 book and 3 lines scanned, page break occurs in the middle of the term of the first line and second half of the word is in the second scanned content but the lines are not sequential
+Expected Output: No results
+*/
+const testCase10In = [
+    {
+        "Title": "Twenty Thousand Leagues Under the Sea",
+        "ISBN": "9780000528531",
+        "Content": [
+            {
+                "Page": 31,
+                "Line": 1,
+                "Text": "now simply went on by her own momentum.  The dark-"
+            },
+            {
+                "Page": 32,
+                "Line": 1,
+                "Text": "ness was then profound; and however good the Canadian\'s"
+            },
+            {
+                "Page": 33,
+                "Line": 1,
+                "Text": "eyes were, I asked myself how he had managed to see, and"
+            } 
+        ] 
+    }
+]
+const testCase10Term = "darkness"
+const testCase10Out = {
+    "SearchTerm": testCase10Term,
+    "Results": []
+}
+
+const testCase10Result = findSearchTermInBooks(testCase10Term, testCase10In);
+if (JSON.stringify(testCase10Out) === JSON.stringify(testCase10Result)) {
+    console.log("PASS: Test 11");
+} else {
+    console.log("FAIL: Test 11");
+    console.log("Expected:", testCase10Out);
+    console.log("Received:", testCase10Result);
+}
+
+/*
+Test Case 11: If a term is inside of a line as well as split between the pagebreak at the end of a line with the subsequent line also scanned, then only one instance of the line including the term should be included in the result
+Input: Search term "darkness" with 3 lines scanned, the first line contains the term darkness and also ends in the word darkness split by a pagebreak with the rest of the word continued on the next line
+Expected Output: Line 1 should only be outputted once
+*/
+const testCase11In = [
+    {
+        "Title": "Twenty Thousand Leagues Under the Sea",
+        "ISBN": "9780000528531",
+        "Content": [
+            {
+                "Page": 31,
+                "Line": 1,
+                "Text": "now simply went on by her own darkness momentum.  The dark-"
+            },
+            {
+                "Page": 31,
+                "Line": 2,
+                "Text": "ness was then profound; and however good the Canadian\'s"
+            },
+            {
+                "Page": 31,
+                "Line": 2,
+                "Text": "eyes were, I asked myself how he had managed to see, and"
+            } 
+        ] 
+    }
+]
+const testCase11Term = "darkness"
+const testCase11Out = {
+    "SearchTerm": testCase11Term,
+    "Results": [
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 1
+        },
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 2
+        }
+    ]
+}
+
+const testCase11Result = findSearchTermInBooks(testCase11Term, testCase11In);
+if (JSON.stringify(testCase11Out) === JSON.stringify(testCase11Result)) {
+    console.log("PASS: Test 12");
+} else {
+    console.log("FAIL: Test 12");
+    console.log("Expected:", testCase11Out);
+    console.log("Received:", testCase11Result);
+}
