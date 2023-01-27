@@ -257,7 +257,7 @@ if (JSON.stringify(testCase4Out) === JSON.stringify(testCase4Result)) {
 
 /*
 Test Case 5: Search term with multiple books and multiple lines inputted should return lines with term present
-Input: search term "the" with 2 book and 3 lines scanned each
+Input: search term "dog" with 2 book and 3 lines scanned each
 Expected Output: Book 1 line 1, Book 2 line 1,2 outputted
 */
 const testCase5In = [
@@ -336,11 +336,75 @@ if (JSON.stringify(testCase5Out) === JSON.stringify(testCase5Result)) {
 }
 
 /*
-Test Case 6: Search term and lines including term in different cases should only return lines with the term in the correct case
+Test Case 6: Search term with multiple books and multiple lines inputted should return no results if the term isn't found
+Input: search term "cat" with 2 book and 3 lines scanned each
+Expected Output: No results
+*/
+const testCase6In = [
+    {
+        "Title": "Book 1",
+        "ISBN": "1234",
+        "Content": [
+            {
+                "Page": 100,
+                "Line": 1,
+                "Text": "the cat eats food"
+            },
+            {
+                "Page": 101,
+                "Line": 2,
+                "Text": "more text here"
+            },
+            {
+                "Page": 102,
+                "Line": 3,
+                "Text": "even more text here"
+            } 
+        ] 
+    },
+    {
+        "Title": "Book 2",
+        "ISBN": "2345",
+        "Content": [
+            {
+                "Page": 100,
+                "Line": 1,
+                "Text": "I like the cat"
+            },
+            {
+                "Page": 101,
+                "Line": 2,
+                "Text": "hello hello the cat hello"
+            },
+            {
+                "Page": 102,
+                "Line": 3,
+                "Text": "more text here"
+            } 
+        ] 
+    },
+]
+const testCase6Term = "dog"    
+const testCase6Out = {
+    "SearchTerm": testCase5Term,
+    "Results": []
+}
+
+const testCase6Result = findSearchTermInBooks(testCase6Term, testCase6In);
+if (JSON.stringify(testCase6Out) === JSON.stringify(testCase6Result)) {
+    console.log("PASS: Test 7");
+} else {
+    console.log("FAIL: Test 7");
+    console.log("Expected:", testCase6Out);
+    console.log("Received:", testCase6Result);
+}
+
+/*
+Test Case 7: Search term and lines including term in different cases should only return lines with the term in the correct case
 Input: search term "Dog" with 1 book and 3 lines scanned
 Expected Output: Book 1 line 2 outputted
 */
-const testCase6In = [
+const testCase7In = [
     {
         "Title": "Book 1",
         "ISBN": "1234",
@@ -363,10 +427,10 @@ const testCase6In = [
         ] 
     },
 ]
-const testCase6Term = "Dog"    
+const testCase7Term = "Dog"    
 /** Example output object */
-const testCase6Out = {
-    "SearchTerm": testCase6Term,
+const testCase7Out = {
+    "SearchTerm": testCase7Term,
     "Results": [
         {
             "ISBN": "1234",
@@ -376,22 +440,22 @@ const testCase6Out = {
     ]
 }
 
-const testCase6Result = findSearchTermInBooks(testCase6Term, testCase6In);
-if (JSON.stringify(testCase6Out) === JSON.stringify(testCase6Result)) {
-    console.log("PASS: Test 7");
+const testCase7Result = findSearchTermInBooks(testCase7Term, testCase7In);
+if (JSON.stringify(testCase7Out) === JSON.stringify(testCase7Result)) {
+    console.log("PASS: Test 8");
 } else {
-    console.log("FAIL: Test 7");
-    console.log("Expected:", testCase6Out);
-    console.log("Received:", testCase6Result);
+    console.log("FAIL: Test 8");
+    console.log("Expected:", testCase7Out);
+    console.log("Received:", testCase7Result);
 }
 
 /*
-Test Case 7: Search term in lines with punctuation around the term should still find the term and return lines with the term in it
+Test Case 8: Search term in lines with punctuation around the term should still find the term and return lines with the term in it
 Input: search term "dog" with 1 book and 4 lines scanned, punctuation around term in all 4 lines
 Expected Output: Book 1 line 2 outputted
 */
 /** Example input object. */
-const testCase7In = [
+const testCase8In = [
     {
         "Title": "Book 1",
         "ISBN": "1234",
@@ -414,9 +478,9 @@ const testCase7In = [
         ] 
     },
 ]
-const testCase7Term = "dog"
-const testCase7Out = {
-    "SearchTerm": testCase7Term,
+const testCase8Term = "dog"
+const testCase8Out = {
+    "SearchTerm": testCase8Term,
     "Results": [
         {
             "ISBN": "1234",
@@ -436,51 +500,6 @@ const testCase7Out = {
     ]
 }
 
-const testCase7Result = findSearchTermInBooks(testCase7Term, testCase7In);
-if (JSON.stringify(testCase7Out) === JSON.stringify(testCase7Result)) {
-    console.log("PASS: Test 8");
-} else {
-    console.log("FAIL: Test 8");
-    console.log("Expected:", testCase7Out);
-    console.log("Received:", testCase7Result);
-}
-
-
-/*
-Test Case 8: Lines with the search term inside of another word should not be returned
-Input: search term "dog" with 1 book and 2 lines scanned
-Expected Output: Book 1 line 1
-*/
-const testCase8In = [
-    {
-        "Title": "Book 1",
-        "ISBN": "1234",
-        "Content": [
-            {
-                "Page": 100,
-                "Line": 1,
-                "Text": "the dog"
-            },
-            {
-                "Page": 100,
-                "Line": 1,
-                "Text": "the dogdog the"
-            },
-        ] 
-    },
-]
-const testCase8Term = "dog"
-const testCase8Out = {
-    "SearchTerm": testCase8Term,
-    "Results": [
-        {
-            "ISBN": "1234",
-            "Page": 100,
-            "Line": 1
-        }
-    ]
-}
-
 const testCase8Result = findSearchTermInBooks(testCase8Term, testCase8In);
 if (JSON.stringify(testCase8Out) === JSON.stringify(testCase8Result)) {
     console.log("PASS: Test 9");
@@ -490,12 +509,57 @@ if (JSON.stringify(testCase8Out) === JSON.stringify(testCase8Result)) {
     console.log("Received:", testCase8Result);
 }
 
+
 /*
-Test Case 9: If a term is split between a pagebreak and both lines including the term are scanned, then both lines should be included in the results.
-Input: search term "darkness" with 1 book and 3 lines scanned and the term is cut by a page break
+Test Case 9: Lines with the search term inside of another word should not be returned
+Input: search term "cone" with 1 book and 2 lines scanned
 Expected Output: Book 1 line 1
 */
 const testCase9In = [
+    {
+        "Title": "Book 1",
+        "ISBN": "1234",
+        "Content": [
+            {
+                "Page": 100,
+                "Line": 1,
+                "Text": "the cone was orange"
+            },
+            {
+                "Page": 100,
+                "Line": 1,
+                "Text": "the pinecone on the tree"
+            },
+        ] 
+    },
+]
+const testCase9Term = "cone"
+const testCase9Out = {
+    "SearchTerm": testCase9Term,
+    "Results": [
+        {
+            "ISBN": "1234",
+            "Page": 100,
+            "Line": 1
+        }
+    ]
+}
+
+const testCase9Result = findSearchTermInBooks(testCase9Term, testCase9In);
+if (JSON.stringify(testCase9Out) === JSON.stringify(testCase9Result)) {
+    console.log("PASS: Test 10");
+} else {
+    console.log("FAIL: Test 10");
+    console.log("Expected:", testCase9Out);
+    console.log("Received:", testCase9Result);
+}
+
+/*
+Test Case 10: If a term is split between a pagebreak and both lines including the term are scanned, then both lines should be included in the results.
+Input: search term "darkness" with 1 book and 3 lines scanned and the term is cut by a page break
+Expected Output: Book 1 line 1
+*/
+const testCase10In = [
     {
         "Title": "Twenty Thousand Leagues Under the Sea",
         "ISBN": "9780000528531",
@@ -518,9 +582,9 @@ const testCase9In = [
         ] 
     }
 ]
-const testCase9Term = "darkness"
-const testCase9Out = {
-    "SearchTerm": testCase9Term,
+const testCase10Term = "darkness"
+const testCase10Out = {
+    "SearchTerm": testCase10Term,
     "Results": [
         {
             "ISBN": "9780000528531",
@@ -535,22 +599,22 @@ const testCase9Out = {
     ]
 }
 
-const testCase9Result = findSearchTermInBooks(testCase9Term, testCase9In);
-if (JSON.stringify(testCase9Out) === JSON.stringify(testCase9Result)) {
-    console.log("PASS: Test 10");
+const testCase10Result = findSearchTermInBooks(testCase10Term, testCase10In);
+if (JSON.stringify(testCase10Out) === JSON.stringify(testCase10Result)) {
+    console.log("PASS: Test 11");
 } else {
-    console.log("FAIL: Test 10");
-    console.log("Expected:", testCase9Out);
-    console.log("Received:", testCase9Result);
+    console.log("FAIL: Test 11");
+    console.log("Expected:", testCase10Out);
+    console.log("Received:", testCase10Result);
 }
 
 /*
-Test Case 10: If a term is in split with a page break but the next line isn't the next line of the page, then neither line should be included in the result (even if the split term is the whole term across 2 pages) 
+Test Case 11: If a term is in split with a page break but the next line isn't the next line of the page, then neither line should be included in the result (even if the split term is the whole term across 2 pages) 
 ("dark-" and "ness" make up the search term darkness but "dark-" is on page 31 and "ness" is on page 32 so they would not be included as a result)
 Input: search term "darkness" with 1 book and 3 lines scanned, page break occurs in the middle of the term of the first line and second half of the word is in the second scanned content but the lines are not sequential
 Expected Output: No results
 */
-const testCase10In = [
+const testCase11In = [
     {
         "Title": "Twenty Thousand Leagues Under the Sea",
         "ISBN": "9780000528531",
@@ -573,27 +637,27 @@ const testCase10In = [
         ] 
     }
 ]
-const testCase10Term = "darkness"
-const testCase10Out = {
-    "SearchTerm": testCase10Term,
+const testCase11Term = "darkness"
+const testCase11Out = {
+    "SearchTerm": testCase11Term,
     "Results": []
 }
 
-const testCase10Result = findSearchTermInBooks(testCase10Term, testCase10In);
-if (JSON.stringify(testCase10Out) === JSON.stringify(testCase10Result)) {
-    console.log("PASS: Test 11");
+const testCase11Result = findSearchTermInBooks(testCase11Term, testCase11In);
+if (JSON.stringify(testCase11Out) === JSON.stringify(testCase11Result)) {
+    console.log("PASS: Test 12");
 } else {
-    console.log("FAIL: Test 11");
-    console.log("Expected:", testCase10Out);
-    console.log("Received:", testCase10Result);
+    console.log("FAIL: Test 12");
+    console.log("Expected:", testCase11Out);
+    console.log("Received:", testCase11Result);
 }
 
 /*
-Test Case 11: If a term is inside of a line as well as split between the pagebreak at the end of a line with the subsequent line also scanned, then only one instance of the line including the term should be included in the result
+Test Case 12: If a term is inside of a line as well as split between the pagebreak at the end of a line with the subsequent line also scanned, then only one instance of the line including the term should be included in the result
 Input: Search term "darkness" with 3 lines scanned, the first line contains the term darkness and also ends in the word darkness split by a pagebreak with the rest of the word continued on the next line
 Expected Output: Line 1 included in results only once
 */
-const testCase11In = [
+const testCase12In = [
     {
         "Title": "Twenty Thousand Leagues Under the Sea",
         "ISBN": "9780000528531",
@@ -616,9 +680,9 @@ const testCase11In = [
         ] 
     }
 ]
-const testCase11Term = "darkness"
-const testCase11Out = {
-    "SearchTerm": testCase11Term,
+const testCase12Term = "darkness"
+const testCase12Out = {
+    "SearchTerm": testCase12Term,
     "Results": [
         {
             "ISBN": "9780000528531",
@@ -633,11 +697,11 @@ const testCase11Out = {
     ]
 }
 
-const testCase11Result = findSearchTermInBooks(testCase11Term, testCase11In);
-if (JSON.stringify(testCase11Out) === JSON.stringify(testCase11Result)) {
-    console.log("PASS: Test 12");
+const testCase12Result = findSearchTermInBooks(testCase12Term, testCase12In);
+if (JSON.stringify(testCase12Out) === JSON.stringify(testCase12Result)) {
+    console.log("PASS: Test 13");
 } else {
-    console.log("FAIL: Test 12");
-    console.log("Expected:", testCase11Out);
-    console.log("Received:", testCase11Result);
+    console.log("FAIL: Test 13");
+    console.log("Expected:", testCase12Out);
+    console.log("Received:", testCase12Result);
 }
