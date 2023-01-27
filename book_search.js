@@ -22,46 +22,46 @@
 function findSearchTermInBooks(searchTerm, scannedTextObj) {
     var resultList = [] // temporary list to return at the end of checking all the books
 
-    if(searchTerm != "" && scannedTextObj.length>0){ // checks inputs to see if there are books in the input
+    if(searchTerm != "" && scannedTextObj.length>0){ // checks input to see if there are books scanned
         for(var iBook=0; iBook<scannedTextObj.length; iBook++){
             var book = scannedTextObj[iBook];
-            if(book.Content.length >0){ // checks to see if the book has scanned content, skips this if and goes to next book if not
+            if(book.Content.length >0){ // checks to see if the book has scanned content, goes to next book if not
                 var isbn = book.ISBN
-                var lineBreakMap = new Map(); //lineIndex,halfword
-                var previousLineHasBreak = false
-                for(var iContent=0; iContent<book.Content.length; iContent++){
+                var lineBreakMap = new Map(); // store values when checking for terms in linebreaks, stores line number, beginning half of word
+                var previousLineHasBreak = false 
+                for(var iContent=0; iContent<book.Content.length; iContent++){ // goes through all the lines scanned 
                     var lineNum = book.Content[iContent].Line;
                     var pageNum = book.Content[iContent].Page;
                     var text = book.Content[iContent].Text;
-                    text = text.replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g,"");
-                    var textArray = text.split(" "); // converts the string of text into an array with each word being an element of the array
-                    if(textArray.includes(searchTerm)){ // checks if the search term is in the text by checking the array
-                        resultList.push( // if the term is found, add the page and line number to the temporary array to be returned at the end
+                    text = text.replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g,""); // removes punctuation from the line before searching it
+                    var textArray = text.split(" "); 
+                    if(textArray.includes(searchTerm)){ // if the search term is in the text then add the result to the list of compiled results
+                        resultList.push(
                             {
                                 "ISBN": isbn,
                                 "Page": pageNum,
                                 "Line": lineNum
                             }
                         );
-                    }else{
-                        if(previousLineHasBreak){
+                    }else{ // if the search term is not found in the text then it may be part of a line break with the previous line (if the previous line is scanned)
+                        if(previousLineHasBreak){ // if there is a line break and the previous line scanned is on the same page exactly one line before the current one and the word split with the dash matches the search term, then the result includes both lines 
                             var previousWord = lineBreakMap.get(iContent-1);
                             if(previousWord+textArray[0] == searchTerm && 
-                                pageNum == book.Content[iContent-1].Page && // making sure the word that separated by the page break is only counted if it is on the same page
-                                lineNum == book.Content[iContent-1].Line + 1){ // making sure the word that separated by the page break is only counted if it is on the next line of the same page
+                                pageNum == book.Content[iContent-1].Page && 
+                                lineNum == book.Content[iContent-1].Line + 1){
                                 var previousResult = {
                                     "ISBN": isbn,
                                     "Page": book.Content[iContent-1].Page,
                                     "Line": book.Content[iContent-1].Line
                                 }
-                                if(!resultList.some( // this check is to make sure the search term wasn't included in the previous sentence twice, before the page break because we don't want to add the result twice (Test Case 11)
-                                    (r) => ((r.ISBN==previousResult.ISBN)&& // checks if any result "r" in the list of results already built is the same result as the previous line, if it is then don't add the result in the result list (again)
+                                if(!resultList.some( // if the previous line is already in the compile list of results, don't add the previous line, otherwise add the previous line because it includes half the search term (Test Case 11)
+                                    (r) => ((r.ISBN==previousResult.ISBN)&& // checks if any result "r" in the list of compiled results is the same result as the previous line, adds the result in the result list if not found
                                             (r.pageNum==previousResult.pageNum)&&
                                             (r.LineNum==previousResult.LineNum)))){
-                                                resultList.push(previousResult); // if the term was only in part of the word of the pagebreak and nowhere else in the previous line, add the previous line to the result as well
+                                                resultList.push(previousResult); 
 
                                 }
-                                resultList.push( // if the term is found, add the page and line number to the temporary array to be returned at the end
+                                resultList.push(
                                 {
                                     "ISBN": isbn,
                                     "Page": pageNum,
@@ -74,10 +74,10 @@ function findSearchTermInBooks(searchTerm, scannedTextObj) {
                             }
                         }
                     }
-                    var lastWord = textArray[textArray.length - 1]
+                    var lastWord = textArray[textArray.length - 1] // after a line has been processed, check if it has a line break because the next line scanned maybe be the next line starting off with the second half of the term and should be included in the results
                     if(lastWord.charAt(lastWord.length-1)=="-"){
                         previousLineHasBreak =  true;
-                        lineBreakMap.set(iContent, lastWord.substring(0, lastWord.length-1))
+                        lineBreakMap.set(iContent, lastWord.substring(0, lastWord.length-1)) // if a linebreak is found, store the last word 
                     }
                 }
             }
@@ -85,7 +85,7 @@ function findSearchTermInBooks(searchTerm, scannedTextObj) {
     }
     var result = {
         "SearchTerm": searchTerm,
-        "Results": resultList // subs in the temporary array of books to be included in the return object
+        "Results": resultList 
     };
     
     return result; 
@@ -111,9 +111,10 @@ function findSearchTermInBooks(searchTerm, scannedTextObj) {
 /** We can check that, given a known input, we get a known output. */
 
 /*
-Test Case 1: 1 search term in 1 book with 3 lines should return lines with term present
-Input: search term "the" with 1 book and 3 lines
-Expected Output: line 9 outputted
+Test Case 1: Term present
+Description: If a search term in 1 book with multiple lines is present, then the result should include all lines with term present
+Input: Search term "the" with 1 book and 3 lines, only line 9 contains term
+Expected Output: Only line 9 included in the result
 */
 /** Example input object. */
 const twentyLeaguesIn = [
@@ -172,8 +173,9 @@ if (test2Result.Results.length == twentyLeaguesOut.Results.length) {
 }
 
 /*
-Test Case 2: No books inputted should return empty results
-Input: Search term "the" with empty list of books
+Test Case 2: No books
+Description: If no books are inputted then there should not be any results returned
+Input: Search term "the" with an empty list of books
 Expected Output: Empty list of results
 */
 const testCase2In = []
@@ -193,8 +195,9 @@ if (JSON.stringify(testCase2Out) === JSON.stringify(testCase2Result)) {
 }
 
 /*
-Test Case 3: No lines scanned should return empty results
-Input: "the" and 1 book with empty content
+Test Case 3: No content
+Description: If there is a book but no lines are scanned then there should not be any results returned
+Input: Search term "the" and 1 book with empty content
 Expected Output: Empty list of results 
 */
 const testCase3In = [
@@ -219,9 +222,10 @@ if (JSON.stringify(testCase3Out) === JSON.stringify(testCase3Result)) {
 }
 
 /*
-Test Case 4: No search term in 1 book with 3 lines should return empty results
+Test Case 4: No search term
+Description:If there is no search term then there should not be any results returned 
 Input: search term "" with 1 book and 3 lines
-Expected Output: line 9 outputted
+Expected Output: Empty list of results
 */
 const testCase4In = [
     {
@@ -587,7 +591,7 @@ if (JSON.stringify(testCase10Out) === JSON.stringify(testCase10Result)) {
 /*
 Test Case 11: If a term is inside of a line as well as split between the pagebreak at the end of a line with the subsequent line also scanned, then only one instance of the line including the term should be included in the result
 Input: Search term "darkness" with 3 lines scanned, the first line contains the term darkness and also ends in the word darkness split by a pagebreak with the rest of the word continued on the next line
-Expected Output: Line 1 should only be outputted once
+Expected Output: Line 1 included in results only once
 */
 const testCase11In = [
     {
